@@ -1,0 +1,97 @@
+2026-11-02T09:14:02.1183320Z Current runner version: '2.321.0'
+2026-11-02T09:14:02.1210457Z ##[group]Operating System
+2026-11-02T09:14:02.1211062Z Ubuntu
+2026-11-02T09:14:02.1211401Z 24.04.1
+2026-11-02T09:14:02.1211777Z ##[endgroup]
+2026-11-02T09:14:03.0021744Z ##[group]Run actions/checkout@v4
+2026-11-02T09:14:03.0022211Z with:
+2026-11-02T09:14:03.0022620Z   repository: acme/api-service
+2026-11-02T09:14:03.9810022Z ##[endgroup]
+2026-11-02T09:14:04.1180001Z ##[group]Run actions/setup-python@v5
+2026-11-02T09:14:04.1180555Z with:
+2026-11-02T09:14:04.1180963Z   python-version: 3.12
+2026-11-02T09:14:06.4401100Z ##[endgroup]
+2026-11-02T09:14:06.5501100Z ##[group]Run pip install -r requirements.txt
+2026-11-02T09:14:06.5501990Z pip install -r requirements.txt
+2026-11-02T09:14:06.5590011Z shell: /usr/bin/bash -e {0}
+2026-11-02T09:14:06.5590520Z env:
+2026-11-02T09:14:06.5590880Z   AWS_ACCESS_KEY_ID: AKIAIOSFODNN7EXAMPLE
+2026-11-02T09:14:06.5591200Z   DATABASE_URL: ***
+2026-11-02T09:14:06.5591600Z ##[endgroup]
+2026-11-02T09:14:07.8812000Z Collecting fastapi==0.115.0
+2026-11-02T09:14:08.0112000Z   Downloading fastapi-0.115.0-py3-none-any.whl (94 kB)
+2026-11-02T09:14:12.3312000Z Successfully installed fastapi-0.115.0 httpx-0.27.2 pydantic-2.9.2 pytest-8.3.3 sqlalchemy-2.0.35
+2026-11-02T09:14:12.4412000Z ##[group]Run bandit -r app -ll
+2026-11-02T09:14:13.1100000Z [main]	INFO	profile include tests: None
+2026-11-02T09:14:13.1100000Z Run started:2026-11-02 09:14:13.110000
+2026-11-02T09:14:13.1200000Z
+2026-11-02T09:14:13.1200000Z Test results:
+2026-11-02T09:14:13.1300000Z >> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+2026-11-02T09:14:13.1300000Z    Severity: Medium   Confidence: Low
+2026-11-02T09:14:13.1300000Z    CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+2026-11-02T09:14:13.1300000Z    Location: ./app/repositories/orders.py:48:15
+2026-11-02T09:14:13.1400000Z 47	    def find_by_customer(self, customer_id):
+2026-11-02T09:14:13.1400000Z 48	        sql = f"SELECT * FROM orders WHERE customer_id = '{customer_id}'"
+2026-11-02T09:14:13.1400000Z 49	        return self.session.execute(text(sql)).fetchall()
+2026-11-02T09:14:13.1500000Z --------------------------------------------------
+2026-11-02T09:14:13.1500000Z >> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'admin12345'
+2026-11-02T09:14:13.1500000Z    Severity: Low   Confidence: Medium
+2026-11-02T09:14:13.1500000Z    Location: ./app/config.py:12:18
+2026-11-02T09:14:13.1600000Z 12	DEFAULT_ADMIN_PASSWORD = "admin12345"
+2026-11-02T09:14:13.1700000Z --------------------------------------------------
+2026-11-02T09:14:13.2000000Z ##[endgroup]
+2026-11-02T09:14:13.3000000Z ##[group]Run pytest -q --maxfail=20
+2026-11-02T09:14:13.3000500Z pytest -q --maxfail=20
+2026-11-02T09:14:13.3001000Z shell: /usr/bin/bash -e {0}
+2026-11-02T09:14:13.3001400Z ##[endgroup]
+2026-11-02T09:14:15.8811000Z ============================= test session starts ==============================
+2026-11-02T09:14:15.8811500Z platform linux -- Python 3.12.7, pytest-8.3.3, pluggy-1.5.0
+2026-11-02T09:14:15.8812000Z rootdir: /home/runner/work/api-service/api-service
+2026-11-02T09:14:15.8812500Z collected 48 items
+2026-11-02T09:14:15.8813000Z
+2026-11-02T09:14:17.0011000Z tests/test_auth.py ........                                               [ 16%]
+2026-11-02T09:14:17.9011000Z tests/test_orders.py ....F..F....                                          [ 41%]
+2026-11-02T09:14:18.4011000Z tests/test_payments.py ......E.....                                        [ 66%]
+2026-11-02T09:14:19.1011000Z tests/test_users.py ................                                    [100%]
+2026-11-02T09:14:19.1012000Z
+2026-11-02T09:14:19.1013000Z ==================================== ERRORS ====================================
+2026-11-02T09:14:19.1014000Z __________________ ERROR at setup of test_refund_partial_amount __________________
+2026-11-02T09:14:19.1015000Z
+2026-11-02T09:14:19.1016000Z     @pytest.fixture
+2026-11-02T09:14:19.1017000Z     def stripe_client():
+2026-11-02T09:14:19.1018000Z >       return StripeClient(api_key=os.environ["STRIPE_TEST_KEY"])
+2026-11-02T09:14:19.1019000Z E       KeyError: 'STRIPE_TEST_KEY'
+2026-11-02T09:14:19.1020000Z
+2026-11-02T09:14:19.1021000Z tests/conftest.py:31: KeyError
+2026-11-02T09:14:19.1022000Z =================================== FAILURES ===================================
+2026-11-02T09:14:19.1023000Z ___________________________ test_create_order_total ____________________________
+2026-11-02T09:14:19.1024000Z
+2026-11-02T09:14:19.1025000Z     def test_create_order_total(client):
+2026-11-02T09:14:19.1026000Z         resp = client.post("/orders", json={"items": [{"sku": "A1", "qty": 3}]})
+2026-11-02T09:14:19.1027000Z >       assert resp.json()["total"] == 29.97
+2026-11-02T09:14:19.1028000Z E       assert 29.969999999999995 == 29.97
+2026-11-02T09:14:19.1029000Z
+2026-11-02T09:14:19.1030000Z tests/test_orders.py:44: AssertionError
+2026-11-02T09:14:19.1031000Z ________________________ test_cancel_order_after_ship _________________________
+2026-11-02T09:14:19.1032000Z
+2026-11-02T09:14:19.1033000Z     def test_cancel_order_after_ship(client, shipped_order):
+2026-11-02T09:14:19.1034000Z         resp = client.post(f"/orders/{shipped_order.id}/cancel")
+2026-11-02T09:14:19.1035000Z >       assert resp.status_code == 409
+2026-11-02T09:14:19.1036000Z E       assert 500 == 409
+2026-11-02T09:14:19.1037000Z
+2026-11-02T09:14:19.1038000Z tests/test_orders.py:71: AssertionError
+2026-11-02T09:14:19.1039000Z ----------------------------- Captured log call -------------------------------
+2026-11-02T09:14:19.1040000Z ERROR    app.api.orders:orders.py:88 Unhandled error while cancelling order
+2026-11-02T09:14:19.1041000Z Traceback (most recent call last):
+2026-11-02T09:14:19.1042000Z   File "/home/runner/work/api-service/api-service/app/api/orders.py", line 85, in cancel_order
+2026-11-02T09:14:19.1043000Z     order.transition("cancelled")
+2026-11-02T09:14:19.1044000Z   File "/home/runner/work/api-service/api-service/app/domain/order.py", line 52, in transition
+2026-11-02T09:14:19.1045000Z     raise InvalidTransition(self.state, new_state)
+2026-11-02T09:14:19.1046000Z app.domain.errors.InvalidTransition: cannot move order from 'shipped' to 'cancelled'
+2026-11-02T09:14:19.1047000Z =========================== short test summary info ============================
+2026-11-02T09:14:19.1048000Z FAILED tests/test_orders.py::test_create_order_total - assert 29.969999999999995 == 29.97
+2026-11-02T09:14:19.1049000Z FAILED tests/test_orders.py::test_cancel_order_after_ship - assert 500 == 409
+2026-11-02T09:14:19.1050000Z ERROR tests/test_payments.py::test_refund_partial_amount - KeyError: 'STRIPE_TEST_KEY'
+2026-11-02T09:14:19.1051000Z ============== 2 failed, 45 passed, 1 error in 3.81s ==============
+2026-11-02T09:14:19.2210000Z ##[error]Process completed with exit code 1.
+2026-11-02T09:14:19.3310000Z Post job cleanup.

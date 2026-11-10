@@ -1,0 +1,26 @@
+[project]
+name = "logpulse"
+version = "0.1.0"
+description = "Serverless QA & CI/CD log analyzer: extracts test failures and security warnings from raw pipeline logs."
+requires-python = ">=3.11"
+readme = "README.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 140
+target-version = "py311"
+extend-exclude = [".venv", ".python_packages"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "RUF"]
+ignore = [
+    "E501",    # long regexes are clearer on one line
+    "RUF001",  # the parser matches box-drawing / bullet characters on purpose
+    "UP042",   # keep (str, Enum): same JSON output on every Python version
+]
+
+[tool.coverage.run]
+omit = ["logpulse/__main__.py"]

@@ -1,0 +1,4 @@
+# Runtime dependencies (deployed to Azure Functions)
+azure-functions>=1.21.0
+azure-cosmos>=4.7.0
+azure-identity>=1.17.0

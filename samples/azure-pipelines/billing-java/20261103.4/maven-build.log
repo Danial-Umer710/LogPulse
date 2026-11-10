@@ -1,0 +1,62 @@
+2026-11-03T14:02:10.4410221Z ##[section]Starting: Maven build
+2026-11-03T14:02:10.4521003Z ==============================================================================
+2026-11-03T14:02:10.4521550Z Task         : Maven
+2026-11-03T14:02:10.4522007Z Description  : Build, test, and deploy with Apache Maven
+2026-11-03T14:02:10.4522550Z ==============================================================================
+2026-11-03T14:02:10.9900100Z Agent name: 'Azure Pipelines 3'
+2026-11-03T14:02:11.0011000Z [command]/usr/bin/mvn -B -f /home/vsts/work/1/s/pom.xml verify
+2026-11-03T14:02:14.1100000Z [INFO] Scanning for projects...
+2026-11-03T14:02:14.4400000Z [INFO]
+2026-11-03T14:02:14.4400000Z [INFO] ---------------------< com.contoso:billing-service >---------------------
+2026-11-03T14:02:14.4400000Z [INFO] Building billing-service 2.4.0-SNAPSHOT
+2026-11-03T14:02:14.4400000Z [INFO] --------------------------------[ jar ]---------------------------------
+2026-11-03T14:02:17.9100000Z [WARNING] The requested profile "ci-fast" could not be activated because it does not exist.
+2026-11-03T14:02:21.2200000Z [INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) @ billing-service ---
+2026-11-03T14:02:24.1100000Z [WARNING] /home/vsts/work/1/s/src/main/java/com/contoso/billing/LegacyExporter.java: Some input files use or override a deprecated API.
+2026-11-03T14:02:26.5500000Z [INFO] --- maven-surefire-plugin:3.5.1:test (default-test) @ billing-service ---
+2026-11-03T14:02:26.6600000Z [INFO]
+2026-11-03T14:02:26.6600000Z [INFO] -------------------------------------------------------
+2026-11-03T14:02:26.6600000Z [INFO]  T E S T S
+2026-11-03T14:02:26.6600000Z [INFO] -------------------------------------------------------
+2026-11-03T14:02:27.9100000Z [INFO] Running com.contoso.billing.InvoiceCalculatorTest
+2026-11-03T14:02:28.2200000Z [ERROR] Tests run: 6, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.301 s <<< FAILURE! -- in com.contoso.billing.InvoiceCalculatorTest
+2026-11-03T14:02:28.2200000Z [ERROR] com.contoso.billing.InvoiceCalculatorTest.appliesVatForEuCustomers -- Time elapsed: 0.022 s <<< FAILURE!
+2026-11-03T14:02:28.2200000Z org.opentest4j.AssertionFailedError: expected: <121.00> but was: <120.99>
+2026-11-03T14:02:28.2200000Z 	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+2026-11-03T14:02:28.2200000Z 	at com.contoso.billing.InvoiceCalculatorTest.appliesVatForEuCustomers(InvoiceCalculatorTest.java:58)
+2026-11-03T14:02:28.2200000Z
+2026-11-03T14:02:28.9900000Z [INFO] Running com.contoso.billing.PaymentGatewayClientTest
+2026-11-03T14:02:39.0100000Z [ERROR] Tests run: 4, Failures: 0, Errors: 1, Skipped: 1, Time elapsed: 10.02 s <<< FAILURE! -- in com.contoso.billing.PaymentGatewayClientTest
+2026-11-03T14:02:39.0100000Z [ERROR] com.contoso.billing.PaymentGatewayClientTest.retriesOnGatewayTimeout -- Time elapsed: 10.01 s <<< ERROR!
+2026-11-03T14:02:39.0100000Z java.net.SocketTimeoutException: Read timed out after 10000 ms
+2026-11-03T14:02:39.0100000Z 	at java.base/sun.nio.ch.NioSocketImpl.timedRead(NioSocketImpl.java:278)
+2026-11-03T14:02:39.0100000Z 	at com.contoso.billing.gateway.PaymentGatewayClient.charge(PaymentGatewayClient.java:91)
+2026-11-03T14:02:39.0100000Z
+2026-11-03T14:02:39.5500000Z [INFO] Running com.contoso.billing.CurrencyConverterTest
+2026-11-03T14:02:39.8800000Z [INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.21 s -- in com.contoso.billing.CurrencyConverterTest
+2026-11-03T14:02:40.0100000Z [INFO]
+2026-11-03T14:02:40.0100000Z [INFO] Results:
+2026-11-03T14:02:40.0100000Z [INFO]
+2026-11-03T14:02:40.0100000Z [ERROR] Failures:
+2026-11-03T14:02:40.0100000Z [ERROR]   InvoiceCalculatorTest.appliesVatForEuCustomers:58 expected: <121.00> but was: <120.99>
+2026-11-03T14:02:40.0100000Z [ERROR] Errors:
+2026-11-03T14:02:40.0100000Z [ERROR]   PaymentGatewayClientTest.retriesOnGatewayTimeout:91 » SocketTimeout Read timed out after 10000 ms
+2026-11-03T14:02:40.0100000Z [INFO]
+2026-11-03T14:02:40.0100000Z [ERROR] Tests run: 19, Failures: 1, Errors: 1, Skipped: 1
+2026-11-03T14:02:40.0100000Z [INFO]
+2026-11-03T14:02:40.1100000Z [INFO] ------------------------------------------------------------------------
+2026-11-03T14:02:40.1100000Z [INFO] BUILD FAILURE
+2026-11-03T14:02:40.1100000Z [INFO] ------------------------------------------------------------------------
+2026-11-03T14:02:40.1100000Z [INFO] Total time:  29.774 s
+2026-11-03T14:02:40.1100000Z [INFO] Finished at: 2026-11-03T14:02:40Z
+2026-11-03T14:02:40.1100000Z [INFO] ------------------------------------------------------------------------
+2026-11-03T14:02:40.1200000Z [ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.1:test (default-test) on project billing-service: There are test failures.
+2026-11-03T14:02:40.1200000Z [ERROR]
+2026-11-03T14:02:40.1200000Z [ERROR] Please refer to /home/vsts/work/1/s/target/surefire-reports for the individual test results.
+2026-11-03T14:02:40.1200000Z [ERROR] -> [Help 1]
+2026-11-03T14:02:40.1200000Z [ERROR]
+2026-11-03T14:02:40.1200000Z [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+2026-11-03T14:02:40.1200000Z [ERROR] Re-run Maven using the -X switch to enable full debug logging.
+2026-11-03T14:02:40.4400000Z ##[error]Build failed.
+2026-11-03T14:02:40.4500000Z ##[error]Maven exited with code '1'.
+2026-11-03T14:02:40.5500000Z ##[section]Finishing: Maven build

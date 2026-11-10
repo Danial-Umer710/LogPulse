@@ -1,0 +1,65 @@
+Started by an SCM change
+Obtained Jenkinsfile from git https://git.example.com/payments/payments-api.git
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on build-agent-07 in /var/lib/jenkins/workspace/payments-api
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Build image)
+[Pipeline] sh
++ docker build -t registry.example.com/payments-api:512 .
+#0 building with "default" instance using docker driver
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 812B done
+#1 DONE 0.0s
+#5 [2/6] RUN apt-get update && apt-get install -y curl
+#5 2.113 W: GPG error: http://deb.debian.org bookworm InRelease: The following signatures couldn't be verified
+#5 DONE 9.4s
+#8 [5/6] RUN npm ci --omit=dev
+#8 31.02 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory.
+#8 DONE 33.1s
+#9 [6/6] RUN npm run build
+#9 12.88 <--- Last few GCs --->
+#9 12.88 FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+#9 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 134
+------
+ > [6/6] RUN npm run build:
+------
+ERROR: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 134
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Scan image)
+[Pipeline] sh
++ trivy image --severity HIGH,CRITICAL registry.example.com/payments-api:511
+
+registry.example.com/payments-api:511 (debian 12.7)
+====================================================
+Total: 3 (HIGH: 2, CRITICAL: 1)
+
+┌──────────────┬────────────────┬──────────┬────────┬───────────────────┬─────────────────┬──────────────────────────────────────────────────────────────┐
+│   Library    │ Vulnerability  │ Severity │ Status │ Installed Version │  Fixed Version  │                            Title                             │
+├──────────────┼────────────────┼──────────┼────────┼───────────────────┼─────────────────┼──────────────────────────────────────────────────────────────┤
+│ libssl3      │ CVE-2024-5535  │ CRITICAL │ fixed  │ 3.0.13-1~deb12u1  │ 3.0.14-1~deb12u1│ openssl: SSL_select_next_proto buffer overread               │
+├──────────────┼────────────────┼──────────┼────────┼───────────────────┼─────────────────┼──────────────────────────────────────────────────────────────┤
+│ libexpat1    │ CVE-2024-45491 │ HIGH     │ fixed  │ 2.5.0-1           │ 2.5.0-1+deb12u1 │ libexpat: Integer Overflow or Wraparound                     │
+│              │ CVE-2024-45492 │ HIGH     │ fixed  │                   │ 2.5.0-1+deb12u1 │ libexpat: integer overflow                                   │
+└──────────────┴────────────────┴──────────┴────────┴───────────────────┴─────────────────┴──────────────────────────────────────────────────────────────┘
+
+Node.js (node-pkg)
+==================
+Total: 1 (HIGH: 1, CRITICAL: 0)
+
+┌───────────────┬────────────────┬──────────┬────────┬───────────────────┬───────────────┬─────────────────────────────────────────────┐
+│    Library    │ Vulnerability  │ Severity │ Status │ Installed Version │ Fixed Version │                    Title                    │
+├───────────────┼────────────────┼──────────┼────────┼───────────────────┼───────────────┼─────────────────────────────────────────────┤
+│ path-to-regexp│ CVE-2024-45296 │ HIGH     │ fixed  │ 0.1.7             │ 0.1.10        │ path-to-regexp: Backtracking regular        │
+│               │                │          │        │                   │               │ expressions cause ReDoS                     │
+└───────────────┴────────────────┴──────────┴────────┴───────────────────┴───────────────┴─────────────────────────────────────────────┘
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+ERROR: script returned exit code 1
+Finished: FAILURE

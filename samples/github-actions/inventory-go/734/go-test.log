@@ -1,0 +1,22 @@
+2026-11-05T10:12:00.0000000Z Current runner version: '2.321.0'
+2026-11-05T10:12:00.1000000Z ##[group]Run go vet ./... && go test -v -race ./...
+2026-11-05T10:12:00.1000500Z ##[endgroup]
+2026-11-05T10:12:04.0000000Z # github.com/acme/inventory/internal/report
+2026-11-05T10:12:04.0000500Z internal/report/export.go:27:9: undefined: csvWriterOptions
+2026-11-05T10:12:08.1000000Z === RUN   TestReserveStock
+2026-11-05T10:12:08.1000500Z --- PASS: TestReserveStock (0.00s)
+2026-11-05T10:12:08.1001000Z === RUN   TestReleaseStock
+2026-11-05T10:12:08.1001500Z --- FAIL: TestReleaseStock (0.00s)
+2026-11-05T10:12:08.1002000Z     stock_test.go:41: expected available=10, got 9
+2026-11-05T10:12:08.1003000Z === RUN   TestConcurrentReservations
+2026-11-05T10:12:08.3003000Z ==================
+2026-11-05T10:12:08.3003100Z WARNING: DATA RACE
+2026-11-05T10:12:08.3003200Z Write at 0x00c0001a4018 by goroutine 9:
+2026-11-05T10:12:08.3003300Z   github.com/acme/inventory/internal/stock.(*Store).Reserve()
+2026-11-05T10:12:08.3003400Z ==================
+2026-11-05T10:12:08.4004000Z --- FAIL: TestConcurrentReservations (0.20s)
+2026-11-05T10:12:08.4004500Z     testing.go:1399: race detected during execution of test
+2026-11-05T10:12:08.4005000Z FAIL
+2026-11-05T10:12:08.4006000Z FAIL	github.com/acme/inventory/internal/stock	0.512s
+2026-11-05T10:12:08.4007000Z FAIL	github.com/acme/inventory/internal/report [build failed]
+2026-11-05T10:12:08.5000000Z ##[error]Process completed with exit code 1.

@@ -1,0 +1,86 @@
+Running with gitlab-runner 17.5.2 (c0e8b9a1)
+  on shared-runner-03 t3_xYz12, system ID: s_0a1b2c3d4e5f
+section_start:1762340001:prepare_executor
+Preparing the "docker" executor
+Using Docker executor with image node:22-alpine ...
+section_end:1762340005:prepare_executor
+section_start:1762340005:get_sources
+Fetching changes with git depth set to 20...
+Checking out 4f2a91c0 as detached HEAD (ref is main)...
+section_end:1762340008:get_sources
+section_start:1762340008:step_script
+$ npm ci
+added 1184 packages, and audited 1185 packages in 21s
+$ npm audit --omit=dev
+# npm audit report
+
+lodash  <=4.17.20
+Severity: critical
+Prototype Pollution in lodash - https://github.com/advisories/GHSA-p6mc-m468-83gw
+Command Injection in lodash - https://github.com/advisories/GHSA-35jh-r3h4-6jhm
+fix available via `npm audit fix`
+node_modules/lodash
+
+axios  1.0.0 - 1.7.3
+Severity: high
+Server-Side Request Forgery in axios - https://github.com/advisories/GHSA-8hc4-vh64-cxmj
+fix available via `npm audit fix`
+node_modules/axios
+
+semver  7.0.0 - 7.5.1
+Severity: moderate
+semver vulnerable to Regular Expression Denial of Service - https://github.com/advisories/GHSA-c2qf-rxjj-qqgw
+fix available via `npm audit fix`
+node_modules/semver
+
+
+3 vulnerabilities (1 moderate, 1 high, 1 critical)
+
+To address all issues, run:
+  npm audit fix
+$ npx tsc --noEmit
+src/components/CartSummary.tsx(42,17): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+src/hooks/useCheckout.ts(18,5): error TS2345: Argument of type 'number' is not assignable to parameter of type 'Money'.
+$ npx jest --ci
+PASS src/utils/format.test.ts
+PASS src/hooks/useAuth.test.ts
+FAIL src/components/CartSummary.test.tsx
+  ● CartSummary › shows free shipping banner above threshold
+
+    expect(received).toBeInTheDocument()
+
+    received value must be an HTMLElement or an SVGElement.
+    Received has value: null
+
+      28 |     render(<CartSummary subtotal={120} />);
+      29 |     const banner = screen.queryByText(/free shipping/i);
+    > 30 |     expect(banner).toBeInTheDocument();
+         |                    ^
+      31 |   });
+
+      at Object.toBeInTheDocument (src/components/CartSummary.test.tsx:30:20)
+
+  ● CartSummary › applies discount code
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test."
+
+      at it (src/components/CartSummary.test.tsx:34:3)
+
+FAIL src/api/client.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '@/config/env' from 'src/api/client.ts'
+
+      at Resolver._throwModNotFoundError (node_modules/jest-resolve/build/resolver.js:427:11)
+
+Test Suites: 2 failed, 2 passed, 4 total
+Tests:       2 failed, 37 passed, 39 total
+Snapshots:   0 total
+Time:        8.412 s
+Ran all test suites.
+section_end:1762340061:step_script
+section_start:1762340061:cleanup_file_variables
+Cleaning up project directory and file based variables
+section_end:1762340062:cleanup_file_variables
+ERROR: Job failed: exit code 1

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Unit tests
+        run: |
+          set -o pipefail
+          python -m pytest --cov=logpulse --cov=function_app --cov-report=term 2>&1 | tee test-output.log
+
+      # Dogfooding: LogPulse analyzes its own test run.
+      - name: Analyze test log with LogPulse
+        if: always()
+        run: python -m logpulse analyze test-output.log --all
+
+      - name: Analyze sample logs (demo)
+        run: python -m logpulse analyze samples --no-color || true
+
+  # Azure deployment job: added in the deployment phase (Bicep + azure/functions-action).

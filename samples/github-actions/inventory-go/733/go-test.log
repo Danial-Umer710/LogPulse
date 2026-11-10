@@ -1,0 +1,23 @@
+2026-11-04T07:40:00.0000000Z Current runner version: '2.321.0'
+2026-11-04T07:40:00.1000000Z ##[group]Run actions/setup-go@v5
+2026-11-04T07:40:00.1000500Z with:
+2026-11-04T07:40:00.1001000Z   go-version: 1.23
+2026-11-04T07:40:03.2000000Z ##[endgroup]
+2026-11-04T07:40:03.3000000Z ##[group]Run go vet ./... && go test -v ./...
+2026-11-04T07:40:03.3000500Z ##[endgroup]
+2026-11-04T07:40:09.1000000Z === RUN   TestReserveStock
+2026-11-04T07:40:09.1000500Z --- PASS: TestReserveStock (0.00s)
+2026-11-04T07:40:09.1001000Z === RUN   TestReleaseStock
+2026-11-04T07:40:09.1001500Z --- PASS: TestReleaseStock (0.00s)
+2026-11-04T07:40:09.1002000Z === RUN   TestRestockThreshold
+2026-11-04T07:40:09.1002500Z --- PASS: TestRestockThreshold (0.01s)
+2026-11-04T07:40:09.1003000Z === RUN   TestConcurrentReservations
+2026-11-04T07:40:09.2003000Z --- PASS: TestConcurrentReservations (0.10s)
+2026-11-04T07:40:09.2004000Z === RUN   TestSkuValidation
+2026-11-04T07:40:09.2004500Z --- SKIP: TestSkuValidation (0.00s)
+2026-11-04T07:40:09.2005000Z     sku_test.go:14: pending new SKU format
+2026-11-04T07:40:09.2006000Z PASS
+2026-11-04T07:40:09.2007000Z ok  	github.com/acme/inventory/internal/stock	0.214s
+2026-11-04T07:40:09.3000000Z ##[warning]Node.js 16 actions are deprecated. Please update the following actions to use Node.js 20: actions/cache@v2.
+2026-11-04T07:40:09.4000000Z Post job cleanup.
+2026-11-04T07:40:09.5000000Z Cleaning up orphan processes

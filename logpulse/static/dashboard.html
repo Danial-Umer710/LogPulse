@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogPulse</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --panel-2: #f0f2f5; --text: #1b1f24; --muted: #5f6b7a; --border: #dde1e6;
+    --accent: #2f6fde; --accent-text: #ffffff;
+    --critical: #a3157a; --high: #d1342f; --medium: #b86e00; --low: #1f7a99; --info: #6b7280;
+    --failed: #d1342f; --unstable: #b86e00; --passed: #1d8a4c;
+    --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --panel: #171b21; --panel-2: #1f242c; --text: #e6e9ee; --muted: #98a2b3; --border: #2a313b;
+      --accent: #5b8ff0; --accent-text: #0b0e12;
+      --critical: #e05cc0; --high: #f0645f; --medium: #e8a23a; --low: #4fb6d6; --info: #9ca3af;
+      --failed: #f0645f; --unstable: #e8a23a; --passed: #3cc47c;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  a { color: var(--accent); }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: var(--panel); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: -.01em; }
+  header h1 span { color: var(--accent); }
+  .badge { font-size: 12px; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px; }
+  .spacer { flex: 1; }
+  button, .btn { font: inherit; border: 1px solid var(--border); background: var(--panel); color: var(--text); padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+  button:hover { filter: brightness(.97); }
+  main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 60px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .tile { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .tile .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .tile .value { font-size: 28px; font-weight: 650; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+  .filters input, .filters select { font: inherit; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); color: var(--text); }
+  .filters input[type=search] { flex: 1 1 260px; min-width: 0; }
+  .chip { display: inline-flex; gap: 6px; align-items: center; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; font-size: 12px; }
+  .chip button { border: 0; background: none; padding: 0; color: var(--muted); }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .tab { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 9px 14px; color: var(--muted); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-top: 0; border-radius: 0 0 12px 12px; box-shadow: var(--shadow); overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; background: var(--panel-2); position: sticky; top: 0; }
+  tbody tr { cursor: pointer; }
+  tbody tr:hover { background: var(--panel-2); }
+  tbody tr:last-child td { border-bottom: 0; }
+  .mono { font-family: var(--mono); font-size: 12.5px; }
+  .muted { color: var(--muted); }
+  .nowrap { white-space: nowrap; }
+  .title-cell { max-width: 560px; overflow-wrap: anywhere; }
+  .pill { display: inline-block; font-size: 11.5px; font-weight: 650; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .03em; border: 1px solid currentColor; white-space: nowrap; }
+  .s-critical { color: var(--critical); } .s-high { color: var(--high); } .s-medium { color: var(--medium); } .s-low { color: var(--low); } .s-info { color: var(--info); }
+  .st-failed { color: var(--failed); } .st-unstable { color: var(--unstable); } .st-passed { color: var(--passed); }
+  .counts span { margin-right: 8px; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .empty { padding: 48px 20px; text-align: center; color: var(--muted); }
+  .empty code { font-family: var(--mono); background: var(--panel-2); padding: 2px 6px; border-radius: 4px; }
+  /* drawer */
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 10; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  aside { position: fixed; top: 0; right: 0; bottom: 0; width: min(760px, 100%); background: var(--panel); border-left: 1px solid var(--border); transform: translateX(100%); transition: transform .2s ease; z-index: 11; display: flex; flex-direction: column; }
+  aside.open { transform: none; }
+  aside .head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
+  aside .head h2 { margin: 0 0 4px; font-size: 16px; overflow-wrap: anywhere; }
+  aside .body { overflow-y: auto; padding: 16px 20px 40px; }
+  .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .meta div { background: var(--panel-2); border-radius: 8px; padding: 8px 10px; }
+  .meta b { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+  details.finding { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: var(--panel); }
+  details.finding[open] { background: var(--panel-2); }
+  details.finding summary { list-style: none; cursor: pointer; padding: 10px 12px; display: flex; gap: 10px; align-items: baseline; }
+  details.finding summary::-webkit-details-marker { display: none; }
+  details.finding .fbody { padding: 0 12px 12px; }
+  details.finding.flash { outline: 2px solid var(--accent); }
+  pre { margin: 8px 0 0; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; overflow-x: auto; font: 12px/1.5 var(--mono); white-space: pre; }
+  .kv { font-size: 12.5px; margin: 2px 0; overflow-wrap: anywhere; } .kv b { color: var(--muted); font-weight: 600; }
+  dialog { border: 1px solid var(--border); border-radius: 14px; padding: 0; background: var(--panel); color: var(--text); width: min(520px, calc(100% - 32px)); }
+  dialog::backdrop { background: rgba(0,0,0,.4); }
+  dialog form { padding: 20px; display: grid; gap: 12px; }
+  dialog h3 { margin: 0; }
+  dialog label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  dialog input { font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); }
+  .drop { border: 2px dashed var(--border); border-radius: 10px; padding: 22px; text-align: center; color: var(--muted); }
+  .drop.over { border-color: var(--accent); color: var(--text); }
+  .row { display: flex; gap: 8px; justify-content: flex-end; }
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 20; }
+  #toast.show { opacity: 1; }
+  @media (max-width: 640px) {
+    header, main { padding-left: 16px; padding-right: 16px; }
+    .hide-sm { display: none; }
+    .tile .value { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Log<span>Pulse</span></h1>
+  <span class="badge" id="storeBadge">connecting…</span>
+  <div class="spacer"></div>
+  <button id="refreshBtn" title="Refresh">Refresh</button>
+  <button class="primary" id="uploadBtn">Upload log</button>
+</header>
+
+<main>
+  <section class="tiles" id="tiles"></section>
+
+  <section class="filters">
+    <input type="search" id="fq" placeholder="Search findings: test name, error, CVE, package…" aria-label="Search">
+    <input id="fpipeline" placeholder="Pipeline" aria-label="Pipeline" size="12">
+    <select id="fstatus" aria-label="Status">
+      <option value="">Any status</option><option value="failed">Failed</option><option value="unstable">Unstable</option><option value="passed">Passed</option>
+    </select>
+    <select id="fseverity" aria-label="Minimum severity">
+      <option value="">Any severity</option><option value="critical">Critical</option><option value="high">High +</option><option value="medium">Medium +</option><option value="low">Low +</option>
+    </select>
+    <select id="fcategory" aria-label="Category">
+      <option value="">Any category</option>
+      <option value="test_failure">Test failure</option><option value="build_error">Build error</option><option value="exception">Exception</option>
+      <option value="security">Security</option><option value="secret_leak">Secret leak</option><option value="infrastructure">Infrastructure</option>
+      <option value="ci_error">CI error</option><option value="warning">Warning</option>
+    </select>
+    <span id="fpChip"></span>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="builds" role="tab">Builds</button>
+    <button class="tab" data-tab="findings" role="tab">Findings</button>
+    <button class="tab" data-tab="recurring" role="tab">Recurring</button>
+  </nav>
+  <section class="card" id="view"></section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside id="drawer" aria-hidden="true">
+  <div class="head">
+    <div style="flex:1; min-width:0">
+      <h2 id="dTitle"></h2>
+      <div class="muted mono" id="dSub"></div>
+    </div>
+    <button id="dClose" aria-label="Close">✕</button>
+  </div>
+  <div class="body" id="dBody"></div>
+</aside>
+
+<dialog id="uploadDlg">
+  <form method="dialog" id="uploadForm">
+    <h3>Upload CI/CD log</h3>
+    <div class="drop" id="drop">Drop .log / .txt / .gz files here, or <label style="display:inline;color:var(--accent);cursor:pointer"><input type="file" id="file" multiple hidden>browse</label>
+      <div id="fileNames" class="mono" style="margin-top:6px"></div></div>
+    <label>Pipeline <input id="uPipeline" value="web-app" required></label>
+    <label>Build ID <input id="uBuild" placeholder="defaults to the file name"></label>
+    <label>Function key <input id="uKey" placeholder="only needed when deployed to Azure" autocomplete="off"></label>
+    <div class="row"><button value="cancel" formnovalidate>Cancel</button><button class="primary" id="uSubmit" value="default">Analyze &amp; store</button></div>
+  </form>
+</dialog>
+<div id="toast"></div>
+
+<script>
+(() => {
+  const API = location.pathname.replace(/\/dashboard\/?$/, "").replace(/\/$/, "") || "/api";
+  const $ = (s) => document.querySelector(s);
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const SEV_ORDER = ["critical", "high", "medium", "low", "info"];
+  const state = { tab: "builds", fingerprint: "" };
+  try { state.tab = localStorage.getItem("lp.tab") || "builds"; } catch {}
+
+  const fmtTime = (iso) => { if (!iso) return ""; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString(undefined, {month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"}); };
+  const pill = (cls, text) => `<span class="pill ${cls}">${esc(text)}</span>`;
+  const sevPill = (s) => pill("s-" + s, s);
+  const statusPill = (s) => pill("st-" + s, s);
+  const counts = (c) => `<span class="counts">${SEV_ORDER.filter(s => c && c[s]).map(s => `<span class="s-${s}" title="${s}">${c[s]} ${s[0].toUpperCase()}</span>`).join("") || '<span class="muted">—</span>'}</span>`;
+  const testsText = (t) => t && t.total != null ? `${t.passed ?? "?"}/${t.total} passed${t.failed ? `, ${t.failed} failed` : ""}${t.errors ? `, ${t.errors} error${t.errors > 1 ? "s" : ""}` : ""}` : "—";
+
+  function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 3000); }
+
+  function params(extra = {}) {
+    const p = new URLSearchParams();
+    const add = (k, v) => { if (v) p.set(k, v); };
+    add("q", $("#fq").value.trim()); add("pipeline", $("#fpipeline").value.trim()); add("status", $("#fstatus").value);
+    add("min_severity", $("#fseverity").value); add("category", $("#fcategory").value); add("fingerprint", state.fingerprint);
+    for (const [k, v] of Object.entries(extra)) add(k, v);
+    return p.toString();
+  }
+
+  async function getJSON(path) {
+    const r = await fetch(`${API}/${path}`);
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(body.error || r.statusText);
+    return body;
+  }
+
+  async function loadTiles() {
+    const o = await getJSON(`overview?${params()}`);
+    const s = o.by_status || {}, v = o.by_severity || {};
+    const tiles = [["Builds analyzed", o.report_count, ""], ["Failed", s.failed || 0, "st-failed"], ["Unstable", s.unstable || 0, "st-unstable"],
+      ["Passed", s.passed || 0, "st-passed"], ["Critical findings", v.critical || 0, "s-critical"], ["High findings", v.high || 0, "s-high"]];
+    $("#tiles").innerHTML = tiles.map(([l, n, c]) => `<div class="tile"><div class="label">${l}</div><div class="value ${c}">${n}</div></div>`).join("");
+    return o;
+  }
+
+  const emptyState = () => `<div class="empty">No matching reports.<br><br>Click <b>Upload log</b>, or (locally) drop files into <code>.localblobs/raw-logs/&lt;pipeline&gt;/&lt;build&gt;/</code>.</div>`;
+
+  async function renderBuilds() {
+    const { items } = await getJSON(`reports?${params({ limit: 200 })}`);
+    if (!items.length) return emptyState();
+    return `<table><thead><tr><th>When</th><th>Pipeline / build</th><th>Status</th><th class="hide-sm">Tests</th><th>Findings</th><th class="hide-sm">Top finding</th></tr></thead><tbody>` +
+      items.map(r => `<tr data-open="${esc(r.pipeline)}|${esc(r.id)}">
+        <td class="nowrap muted">${esc(fmtTime(r.processed_at))}</td>
+        <td><b>${esc(r.pipeline)}</b> <span class="muted">#${esc(r.build_id)}</span><div class="muted mono">${esc((r.source_blob || "").split("/").pop())}</div></td>
+        <td>${statusPill(r.status)}</td>
+        <td class="hide-sm nowrap">${esc(testsText(r.tests))}</td>
+        <td class="nowrap">${counts(r.severity_counts)}</td>
+        <td class="hide-sm title-cell">${esc(r.top_finding || "")}</td></tr>`).join("") + `</tbody></table>`;
+  }
+
+  async function renderFindings() {
+    const { items } = await getJSON(`failures?${params({ limit: 300 })}`);
+    if (!items.length) return emptyState();
+    return `<table><thead><tr><th>Severity</th><th>Category</th><th>Finding</th><th>Build</th><th class="hide-sm">Line</th></tr></thead><tbody>` +
+      items.map(f => `<tr data-open="${esc(f.pipeline)}|${esc(f.report_id)}" data-fp="${esc(f.fingerprint)}">
+        <td>${sevPill(f.severity)}</td><td class="nowrap muted">${esc(f.category.replace("_", " "))}</td>
+        <td class="title-cell">${esc(f.title)}${f.occurrences > 1 ? ` <span class="muted">×${f.occurrences}</span>` : ""}
+          ${f.file ? `<div class="muted mono">${esc(f.file)}${f.file_line ? ":" + f.file_line : ""}</div>` : ""}</td>
+        <td class="nowrap"><b>${esc(f.pipeline)}</b> <span class="muted">#${esc(f.build_id)}</span></td>
+        <td class="hide-sm mono muted">L${f.line}</td></tr>`).join("") + `</tbody></table>`;
+  }
+
+  async function renderRecurring(overview) {
+    const items = overview.recurring || [];
+    if (!items.length) return `<div class="empty">No recurring medium-or-worse problems yet. These appear once the same failure shows up in several builds.</div>`;
+    return `<table><thead><tr><th>Severity</th><th>Problem</th><th>Builds</th><th class="hide-sm">Pipelines</th><th class="hide-sm">Last seen</th></tr></thead><tbody>` +
+      items.map(e => `<tr data-fpfilter="${esc(e.fingerprint)}" title="Show every occurrence">
+        <td>${sevPill(e.severity)}</td><td class="title-cell">${esc(e.title)}<div class="muted">${esc(e.category.replace("_", " "))}</div></td>
+        <td><b>${e.build_count}</b></td><td class="hide-sm">${e.pipelines.map(esc).join(", ")}</td>
+        <td class="hide-sm nowrap muted">${esc(fmtTime(e.last_seen))}</td></tr>`).join("") + `</tbody></table>`;
+  }
+
+  let renderSeq = 0;
+  async function refresh() {
+    const seq = ++renderSeq;
+    document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === state.tab));
+    $("#fpChip").innerHTML = state.fingerprint ? `<span class="chip">same problem: <span class="mono">${esc(state.fingerprint)}</span><button id="clearFp" aria-label="Clear">✕</button></span>` : "";
+    try {
+      const overview = await loadTiles();
+      const html = state.tab === "builds" ? await renderBuilds() : state.tab === "findings" ? await renderFindings() : await renderRecurring(overview);
+      if (seq === renderSeq) $("#view").innerHTML = html;
+    } catch (e) {
+      if (seq === renderSeq) $("#view").innerHTML = `<div class="empty">Could not load data: ${esc(e.message)}</div>`;
+    }
+  }
+
+  async function openReport(pipeline, id, fingerprint) {
+    let r;
+    try { r = await getJSON(`reports/${encodeURIComponent(pipeline)}/${encodeURIComponent(id)}`); } catch (e) { toast(e.message); return; }
+    $("#dTitle").innerHTML = `${statusPill(r.status)} ${esc(r.pipeline)} <span class="muted">#${esc(r.build_id)}</span>`;
+    $("#dSub").textContent = r.source_blob;
+    const meta = [["Processed", fmtTime(r.processed_at)], ["CI platform", r.ci_platform], ["Tools", (r.detected_tools || []).join(", ") || "—"],
+      ["Tests", testsText(r.tests)], ["Log size", `${r.line_count.toLocaleString()} lines`], ["Parse time", `${r.duration_ms} ms`]];
+    $("#dBody").innerHTML = `<div class="meta">${meta.map(([k, v]) => `<div><b>${k}</b>${esc(v)}</div>`).join("")}</div>
+      ${r.findings_truncated ? `<p class="muted">Only the most severe findings are shown (the list was truncated to fit storage limits).</p>` : ""}
+      ${r.findings.length ? r.findings.map(f => `
+        <details class="finding" data-fp="${esc(f.fingerprint)}">
+          <summary>${sevPill(f.severity)}<span style="flex:1;min-width:0;overflow-wrap:anywhere">${esc(f.title)}${f.occurrences > 1 ? ` <span class="muted">×${f.occurrences}</span>` : ""}</span><span class="muted mono nowrap">L${f.line}</span></summary>
+          <div class="fbody">
+            <div class="kv"><b>Category:</b> ${esc(f.category.replace("_", " "))} · <b>Source:</b> ${esc(f.source)}</div>
+            ${f.test_name ? `<div class="kv"><b>Test:</b> <span class="mono">${esc(f.test_name)}</span></div>` : ""}
+            ${f.file ? `<div class="kv"><b>File:</b> <span class="mono">${esc(f.file)}${f.file_line ? ":" + f.file_line : ""}</span></div>` : ""}
+            ${f.package ? `<div class="kv"><b>Package:</b> ${esc(f.package)}</div>` : ""}
+            ${f.identifier ? `<div class="kv"><b>ID:</b> <span class="mono">${esc(f.identifier)}</span></div>` : ""}
+            ${f.message && f.message !== f.title ? `<div class="kv"><b>Message:</b> ${esc(f.message)}</div>` : ""}
+            ${f.context && f.context.length ? `<pre>${f.context.map(esc).join("\n")}</pre>` : ""}
+            <div class="kv" style="margin-top:8px"><a href="#" data-fpfilter="${esc(f.fingerprint)}">Find this problem in other builds →</a></div>
+          </div>
+        </details>`).join("") : `<div class="empty">No problems found in this log. 🎉</div>`}`;
+    $("#drawer").classList.add("open"); $("#scrim").classList.add("open"); $("#drawer").setAttribute("aria-hidden", "false");
+    if (fingerprint) {
+      const el = $("#dBody").querySelector(`details[data-fp="${CSS.escape(fingerprint)}"]`);
+      if (el) { el.open = true; el.classList.add("flash"); el.scrollIntoView({ block: "center" }); }
+    }
+  }
+  function closeDrawer() { $("#drawer").classList.remove("open"); $("#scrim").classList.remove("open"); $("#drawer").setAttribute("aria-hidden", "true"); }
+
+  function filterByFingerprint(fp) { state.fingerprint = fp; state.tab = "findings"; closeDrawer(); refresh(); }
+
+  // --- events -----------------------------------------------------------------
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+    state.tab = t.dataset.tab; try { localStorage.setItem("lp.tab", state.tab); } catch {} refresh();
+  }));
+  let debounce;
+  ["#fq", "#fpipeline"].forEach(s => $(s).addEventListener("input", () => { clearTimeout(debounce); debounce = setTimeout(refresh, 250); }));
+  ["#fstatus", "#fseverity", "#fcategory"].forEach(s => $(s).addEventListener("change", refresh));
+  $("#refreshBtn").addEventListener("click", refresh);
+  $("#dClose").addEventListener("click", closeDrawer); $("#scrim").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+  document.addEventListener("click", (e) => {
+    const fpLink = e.target.closest("[data-fpfilter]");
+    if (fpLink) { e.preventDefault(); filterByFingerprint(fpLink.dataset.fpfilter); return; }
+    if (e.target.closest("#clearFp")) { state.fingerprint = ""; refresh(); return; }
+    const row = e.target.closest("tr[data-open]");
+    if (row) { const [p, id] = row.dataset.open.split("|"); openReport(p, id, row.dataset.fp); }
+  });
+
+  // --- upload -------------------------------------------------------------------
+  let files = [];
+  const setFiles = (list) => { files = [...list]; $("#fileNames").textContent = files.map(f => f.name).join(", "); };
+  $("#uploadBtn").addEventListener("click", () => { setFiles([]); try { $("#uKey").value = sessionStorage.getItem("lp.key") || ""; } catch {} $("#uploadDlg").showModal(); });
+  $("#file").addEventListener("change", (e) => setFiles(e.target.files));
+  const drop = $("#drop");
+  drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+  drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over"); setFiles(e.dataTransfer.files); });
+  $("#uploadForm").addEventListener("submit", async (e) => {
+    if (e.submitter && e.submitter.value === "cancel") return;
+    e.preventDefault();
+    if (!files.length) { toast("Choose at least one log file"); return; }
+    const key = $("#uKey").value.trim();
+    try { sessionStorage.setItem("lp.key", key); } catch {}
+    $("#uSubmit").disabled = true;
+    let ok = 0, last = null;
+    for (const f of files) {
+      const q = new URLSearchParams({ store: "true", pipeline: $("#uPipeline").value.trim() || "adhoc",
+        build: $("#uBuild").value.trim() || f.name.replace(/\.(log|txt|gz)$/g, ""), name: f.name });
+      if (key) q.set("code", key);
+      try {
+        const r = await fetch(`${API}/analyze?${q}`, { method: "POST", body: await f.arrayBuffer() });
+        const body = await r.json();
+        if (!r.ok) throw new Error(body.error || r.statusText);
+        ok++; last = body;
+      } catch (err) { toast(`${f.name}: ${err.message}`); }
+    }
+    $("#uSubmit").disabled = false;
+    $("#uploadDlg").close();
+    if (ok) { toast(`Analyzed ${ok} log${ok > 1 ? "s" : ""}`); state.tab = "builds"; await refresh(); if (ok === 1 && last) openReport(last.pipeline, last.id); }
+  });
+
+  // Deep links: ?tab=findings&q=CVE&status=failed&min_severity=high&category=security&pipeline=x&fingerprint=…
+  //             ?open=<pipeline>/<report id>[&finding=<fingerprint>]   opens a report directly
+  const link = new URLSearchParams(location.search);
+  if (link.get("tab")) state.tab = link.get("tab");
+  if (link.get("fingerprint")) state.fingerprint = link.get("fingerprint");
+  for (const [param, sel] of [["q", "#fq"], ["pipeline", "#fpipeline"], ["status", "#fstatus"], ["min_severity", "#fseverity"], ["category", "#fcategory"]]) {
+    if (link.get(param)) $(sel).value = link.get(param);
+  }
+
+  getJSON("health").then(h => $("#storeBadge").textContent = h.store.replace("ReportStore", "") + " store").catch(() => $("#storeBadge").textContent = "API unreachable");
+  refresh().then(() => {
+    const open = link.get("open");
+    if (open && open.includes("/")) {
+      const [p, ...rest] = open.split("/");
+      openReport(p, rest.join("/"), link.get("finding") || "");
+    }
+  });
+  setInterval(() => { if (!document.hidden && !$("#drawer").classList.contains("open")) refresh(); }, 15000);
+})();
+</script>
+</body>
+</html>

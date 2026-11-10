@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.localdb/
+.localblobs/
+local.settings.json
+__azurite_db*__.json
+__blobstorage__/
+__queuestorage__/
+.python_packages/
+.vscode/
+*.egg-info/
+dist/
