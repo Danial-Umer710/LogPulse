@@ -153,6 +153,8 @@ infra/main.bicep         all Azure resources (Infrastructure as Code)
 scripts/                 deploy.ps1 · upload-samples.ps1 · teardown.ps1 · package.py
 samples/                 realistic logs from 4 CI platforms
 tests/                   104 tests (pytest)
+docs/                    full project documentation + screenshots
+submission/              course submission: 5-page documentation and presentation
 ```
 
 ## Configuration
@@ -184,3 +186,9 @@ The infrastructure is defined in [`infra/main.bicep`](infra/main.bicep):
 - Application Insights
 
 Everything authenticates with a **managed identity**, so there are no keys in the configuration.
+
+## Documentation
+
+- [Full project documentation](docs/LogPulse_Project_Documentation.pdf) with screenshots of the Azure deployment
+- [Short documentation (5 pages)](submission/LogPulse_Documentation_Danial_Umer.pdf)
+- [Presentation](submission/LogPulse_Presentation_Danial_Umer.pdf) ([PowerPoint](submission/LogPulse_Presentation_Danial_Umer.pptx))
